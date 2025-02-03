@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import hashlib
 import tempfile
 import traceback
 import zipfile
@@ -145,11 +146,21 @@ class _CustomMarkdownify(markdownify.MarkdownConverter):
         ):
             return alt
 
-        # Remove dataURIs
-        if src.startswith("data:"):
-            src = src.split(",")[0] + "..."
+        # Save image with md5 hash as filename
+        file_name = ""
+        if src.startswith("data:image"):
+            if not os.path.exists("images"):
+                os.makedirs("images")
 
-        return "![%s](%s%s)" % (alt, src, title_part)
+            b64 = src.split(",")[1]
+            ext = src.split(";")[0].split("/")[1]
+            md5 = hashlib.md5(b64.encode()).hexdigest()
+            file_name = f"./images/{md5}.{ext}"
+            # Save the image to file
+            with open(file_name, "wb") as f:
+                f.write(base64.b64decode(b64))
+
+        return "![%s](%s)" % (alt, file_name)
 
     def convert_soup(self, soup: Any) -> str:
         return super().convert_soup(soup)  # type: ignore
