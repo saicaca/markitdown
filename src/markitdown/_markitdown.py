@@ -160,7 +160,7 @@ class _CustomMarkdownify(markdownify.MarkdownConverter):
             with open(file_name, "wb") as f:
                 f.write(base64.b64decode(b64))
 
-        return "![%s](%s)" % (alt, file_name)
+        return "![](%s)" % (file_name)
 
     def convert_soup(self, soup: Any) -> str:
         return super().convert_soup(soup)  # type: ignore
